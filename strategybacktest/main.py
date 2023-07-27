@@ -3,6 +3,7 @@ Main Script
 
 I include generous comments to explain my thoughts.
 """
+import sys  # noqa: F401
 
 import matplotlib.pyplot as plt  # noqa: F401
 import pandas as pd
@@ -21,18 +22,19 @@ prices_df, weights_df = data_collector(data_filepath, plot=False)
 # Initialise the backtest
 asset_universe = list(prices_df.columns)
 
-initial_capital = 10000000
+initial_capital = 1000000000
 strategy = DummyStrategy(weights_df=weights_df)
 
 portfolio = Portfolio(
     initial_capital=initial_capital,
     price_data_source=prices_df,
     asset_universe=asset_universe,
-    transaction_cost=0.05,
+    initial_weights=weights_df.iloc[0].to_dict(),
+    transaction_cost=1,
 )
 
 backtest = Backtest(
-    strategy=strategy, timestamps=prices_df.index, portfolio=portfolio
+    strategy=strategy, timestamps=prices_df.index.values, portfolio=portfolio
 )
 
 backtest.run_backtest()
@@ -42,16 +44,16 @@ backtest.run_backtest()
 plt.figure()
 pd.Series(backtest._NAV_record).plot()
 
-# <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
 portfolio = Portfolio(
     initial_capital=initial_capital,
     price_data_source=prices_df,
     asset_universe=asset_universe,
+    initial_weights=weights_df.iloc[0].to_dict(),
     transaction_cost=0,
 )
 
 backtest = Backtest(
-    strategy=strategy, timestamps=prices_df.index, portfolio=portfolio
+    strategy=strategy, timestamps=prices_df.index.values, portfolio=portfolio
 )
 
 backtest.run_backtest()

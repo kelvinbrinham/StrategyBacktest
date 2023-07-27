@@ -20,6 +20,7 @@ class Portfolio:
     def __init__(
         self,
         initial_capital: float,
+        initial_weights: Dict[str, float],
         price_data_source: pd.DataFrame,
         asset_universe: List[str],
         transaction_cost: float = 0,
@@ -27,15 +28,16 @@ class Portfolio:
         self.price_data_source = price_data_source
         self.asset_universe = asset_universe
         self.transaction_cost = transaction_cost
+        self.positions = {ticker: 0 for ticker in self.asset_universe}
+        # self.positions = initial_weights
         # NAV includes cash
         self._NAV = initial_capital
         self._cash = initial_capital
-        # {ticker: number of shares}
-        self._positions = {ticker: 0 for ticker in self.asset_universe}
         self._target_positions = {}
         self._prices = {}
         self._rebalance_record = {}
         self._current_weights = {}
+        self._initial = True
 
     def rebalance(self, weights: Dict[str, float], ts: pd.Timestamp) -> None:
         """
@@ -61,13 +63,12 @@ class Portfolio:
             )
 
             # Update positions
-            self._positions = {
+            self.positions = {
                 ticker: position + trades[ticker]
-                for ticker, position in self._positions.items()
+                for ticker, position in self.positions.items()
             }
 
         self._current_weights = weights
-        print(ts, self._positions)
 
     @property
     def NAV(self) -> float:
@@ -93,7 +94,7 @@ class Portfolio:
             # Calculate number of shares
             # NOTE: We assume buy and sell price are the same given the data.
             target_position_value = self._NAV * target_weight
-            current_position_value = self._positions[ticker] * prices[ticker]
+            current_position_value = self.positions[ticker] * prices[ticker]
 
             pre_cost_trade_value = (
                 target_position_value - current_position_value
@@ -104,14 +105,24 @@ class Portfolio:
                 1 - self.transaction_cost
             )
 
+            if self._initial:
+                cost_trade_value = target_position_value
+
             trade_quantity = int(cost_trade_value / prices[ticker])
-            leftover_capital += (
-                cost_trade_value - trade_quantity * prices[ticker]
-            )
+
+            if trade_quantity > 0:
+                leftover_capital += (
+                    cost_trade_value - trade_quantity * prices[ticker]
+                )
+            else:
+                leftover_capital -= (
+                    cost_trade_value - trade_quantity * prices[ticker]
+                )
 
             trade_dict[ticker] = trade_quantity
 
         self._cash = leftover_capital
+        self._initial = False
         return trade_dict
 
     def _get_net_asset_value(self, prices: Dict[str, float]) -> float:
@@ -125,7 +136,7 @@ class Portfolio:
             Current market value of all assets.
         """
         net_asset_value = 0
-        for ticker, position in self._positions.items():
+        for ticker, position in self.positions.items():
             net_asset_value += position * prices[ticker]
 
         return net_asset_value
