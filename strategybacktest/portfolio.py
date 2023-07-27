@@ -1,7 +1,7 @@
 """Portfolio class for backtesting."""
 
 
-from typing import Dict
+from typing import Dict, List
 
 import pandas as pd
 
@@ -21,17 +21,20 @@ class Portfolio:
         self,
         initial_capital: float,
         price_data_source: pd.DataFrame,
+        asset_universe: List[str],
         transaction_cost: float = 0,
     ) -> None:
         self.price_data_source = price_data_source
+        self.asset_universe = asset_universe
         self.transaction_cost = transaction_cost
         # NAV includes cash
         self._NAV = initial_capital
         self._cash = initial_capital
         # {ticker: number of shares}
-        self._positions = {}
+        self._positions = {ticker: 0 for ticker in self.asset_universe}
         self._target_positions = {}
         self._prices = {}
+        self._rebalance_record = {}
         self._current_weights = {}
 
     def rebalance(self, weights: Dict[str, float], ts: pd.Timestamp) -> None:
@@ -45,20 +48,26 @@ class Portfolio:
         # Get new prices
         self._prices = self.price_data_source.loc[ts].to_dict()
 
-        # Rebalance portfolio
-        # Size positions
-        trades = self._position_sizer(
-            target_weights=weights, prices=self._prices
-        )
-
-        # Update positions
-        self._positions = {
-            ticker: position + trades[ticker]
-            for ticker, position in self._positions.items()
-        }
-
         # Update NAV
         self._NAV = self._cash + self._get_net_asset_value(prices=self._prices)
+        self._rebalance_record[ts] = self._NAV
+
+        # if self._current_weights != weights:
+        if True:
+            # Rebalance portfolio
+            # Size positions
+            trades = self._position_sizer(
+                target_weights=weights, prices=self._prices
+            )
+
+            # Update positions
+            self._positions = {
+                ticker: position + trades[ticker]
+                for ticker, position in self._positions.items()
+            }
+
+        self._current_weights = weights
+        print(ts, self._positions)
 
     @property
     def NAV(self) -> float:
@@ -84,15 +93,13 @@ class Portfolio:
             # Calculate number of shares
             # NOTE: We assume buy and sell price are the same given the data.
             target_position_value = self._NAV * target_weight
-            current_position_value = self._NAV * self._current_weights.get(
-                ticker, 0
-            )
+            current_position_value = self._positions[ticker] * prices[ticker]
 
             pre_cost_trade_value = (
                 target_position_value - current_position_value
             )
 
-            # Comission
+            # Comission NOTE: Must check if this costs money.
             cost_trade_value = pre_cost_trade_value * (
                 1 - self.transaction_cost
             )

@@ -43,6 +43,7 @@ class DummyStrategy(Strategy):
 
     def __init__(self, weights_df: pd.DataFrame) -> None:
         self.weights_df = weights_df
+        self._current_weights = {}
 
     def __call__(self, ts: pd.Timestamp) -> Dict[str, float]:
         """
@@ -55,6 +56,7 @@ class DummyStrategy(Strategy):
         Returns:
             Dictionary of target weights.
         """
-        new_weights = self.weights_df.loc[ts].to_dict()
+        if ts in self.weights_df.index:
+            self._current_weights = self.weights_df.loc[ts].to_dict()
 
-        return new_weights
+        return self._current_weights

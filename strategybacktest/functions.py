@@ -21,10 +21,10 @@ def data_collector(
         Tuple of prices dataframe and weights dataframe.
     """
     prices_df = pd.read_excel(data_filepath, sheet_name="Data", index_col=0)
-    prices_df.index = pd.to_datetime(prices_df.index)
+    prices_df.index = pd.to_datetime(prices_df.index, format="%Y-%d-%m")
 
     weights_df = pd.read_excel(data_filepath, sheet_name="Weights", index_col=0)
-    weights_df.index = pd.to_datetime(weights_df.index)
+    weights_df.index = pd.to_datetime(weights_df.index, format="%Y-%d-%m")
 
     # Check prices are valid
     if (prices_df <= 0).any().any():

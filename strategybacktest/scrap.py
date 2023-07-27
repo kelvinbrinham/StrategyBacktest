@@ -1,12 +1,14 @@
 """Scrap"""
 
+import numpy as np
+import pandas as pd
+from functions import data_collector
 
-positions = {"A": 100, "B": 200, "C": 3000, "D": 90}
+data_filepath = ".data/Task.xlsx"
+prices_df, weights_df = data_collector(data_filepath, plot=False)
 
-trades = {"A": 5, "B": 200, "C": -1000, "D": -100}
 
-dict_ = {
-    ticker: position + trades[ticker] for ticker, position in positions.items()
-}
+new_df = prices_df.mul(weights_df, fill_value=np.nan).dropna()
+sum_df = pd.DataFrame(new_df.sum(axis=1), columns=["Sum"])
 
-print(dict_)
+print(sum_df)
