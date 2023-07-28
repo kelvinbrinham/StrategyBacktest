@@ -6,8 +6,8 @@ The backtest includes flat-rate transaction costs and includes a variable risk f
 
 I note a few points:
 
-- Only whole shares are used (but this can be easily changed in the Portfolio class).
-- ...
+- Only whole shares are used (but this can be easily changed in the Portfolio class). Spare capital is held as cash.
+- Weights change each month in the example data, but the portfolio is rebalanced daily (due to changed in share price). This can be changed in the Portfolio class. (E.g. if transaction costs are sufficiently high, one may want to rebalance less frequently.)
 
 ## Installation
 
