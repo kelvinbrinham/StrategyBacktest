@@ -54,7 +54,10 @@ class Portfolio:
         self._NAV = self._cash + self._get_net_asset_value(prices=self._prices)
         self._rebalance_record[ts] = self._NAV
 
+        # NOTE: Frequency of rebalancing can be changed here.
+        # Monthly rebalancing
         # if self._current_weights != weights:
+        # Daily rebalancing.
         if True:
             # Rebalance portfolio
             # Size positions
