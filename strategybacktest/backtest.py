@@ -126,9 +126,14 @@ class BacktestAnalysis:
             for NAV in self._NAV_record.values()
         ]
         plt.plot(self._NAV_record.keys(), normalised_NAV_record)
-        plt.title("NAV - Daily Rebalancing - 0.3% Transaction Cost")
+        plt.title(
+            "NAV - Daily Rebalancing -"
+            f" {self.backtest.portfolio.transaction_cost * 100}%"
+            " Transaction Cost"
+        )
         plt.ylabel("NAV / Initial Capital")
         plt.xlabel("Date")
+        plt.savefig("output/NAV_plot.png", dpi=500)
         plt.show()
 
     @property
@@ -137,11 +142,21 @@ class BacktestAnalysis:
         if not self._compute_stats:
             raise ValueError("Please run compute_stats() first.")
         plt.figure()
-        plt.plot(self._daily_drawdown.index, self._daily_drawdown)
-        plt.plot(self._max_daily_drawdown.index, self._max_daily_drawdown)
-        plt.title("Drawdowns")
+        plt.plot(
+            self._daily_drawdown.index,
+            self._daily_drawdown,
+            label="Daily Drawdown",
+        )
+        plt.plot(
+            self._max_daily_drawdown.index,
+            self._max_daily_drawdown,
+            label="Max Daily Drawdown",
+        )
+        plt.title("Underwater Chart")
         plt.ylabel("Drawdown")
         plt.xlabel("Date")
+        plt.legend()
+        plt.savefig("output/underwater.png", dpi=500)
         plt.show()
 
     def _construct_summary_stats(self) -> None:
