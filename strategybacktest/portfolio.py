@@ -20,7 +20,6 @@ class Portfolio:
     def __init__(
         self,
         initial_capital: float,
-        initial_weights: Dict[str, float],
         price_data_source: pd.DataFrame,
         asset_universe: List[str],
         transaction_cost: float = 0,
@@ -29,6 +28,7 @@ class Portfolio:
         self.asset_universe = asset_universe
         self.transaction_cost = transaction_cost
         self.positions = {ticker: 0 for ticker in self.asset_universe}
+        self.initial_capital = initial_capital
         # self.positions = initial_weights
         # NAV includes cash
         self._NAV = initial_capital
@@ -74,6 +74,11 @@ class Portfolio:
     def NAV(self) -> float:
         """Return the NAV for backtesting"""
         return self._NAV
+
+    @property
+    def get_initial_capital(self) -> float:
+        """Return the Initial Capital for backtesting"""
+        return self.initial_capital
 
     def _position_sizer(
         self, target_weights: Dict[str, float], prices: Dict[str, float]

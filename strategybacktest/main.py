@@ -6,8 +6,7 @@ I include generous comments to explain my thoughts.
 import sys  # noqa: F401
 
 import matplotlib.pyplot as plt  # noqa: F401
-import pandas as pd
-from backtest import Backtest
+from backtest import Backtest, BacktestAnalysis
 from functions import data_collector
 from portfolio import Portfolio
 from strategy import DummyStrategy
@@ -29,8 +28,7 @@ portfolio = Portfolio(
     initial_capital=initial_capital,
     price_data_source=prices_df,
     asset_universe=asset_universe,
-    initial_weights=weights_df.iloc[0].to_dict(),
-    transaction_cost=1,
+    transaction_cost=0.003,
 )
 
 backtest = Backtest(
@@ -39,26 +37,16 @@ backtest = Backtest(
 
 backtest.run_backtest()
 
-# print(backtest.NAV_record)
-# Plot the NAV
-plt.figure()
-pd.Series(backtest._NAV_record).plot()
 
-portfolio = Portfolio(
-    initial_capital=initial_capital,
-    price_data_source=prices_df,
-    asset_universe=asset_universe,
-    initial_weights=weights_df.iloc[0].to_dict(),
-    transaction_cost=0,
-)
+# Analysis
+analyser = BacktestAnalysis(backtest=backtest, risk_free_rate=0.0)
+stats = analyser.compute_stats()
 
-backtest = Backtest(
-    strategy=strategy, timestamps=prices_df.index.values, portfolio=portfolio
-)
+# print(stats[0])
+print(stats[1])
 
-backtest.run_backtest()
+analyser.plot
+# analyser.underwater_plot
 
-# print(backtest.NAV_record)
-# Plot the NAV
-pd.Series(backtest._NAV_record).plot()
-plt.show()
+
+# 29 days

@@ -1,6 +1,10 @@
 """Backtest Class"""
 
+from typing import Tuple
+
 import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
 from portfolio import Portfolio
 from strategy import Strategy
 
@@ -37,9 +41,133 @@ class Backtest:
         """Return the NAV record for backtesting"""
         return self._NAV_record
 
+
+class BacktestAnalysis:
+    """
+    Compute backtest statistics.
+
+    Args:
+        backtest: Backtest class.
+        risk_free_rate: (annual) Risk free rate. Defaults to 0.
+    """
+
+    def __init__(self, backtest: Backtest, risk_free_rate: float = 0) -> None:
+        self.backtest = backtest
+        self.risk_free_rate = risk_free_rate
+        self._NAV_record = backtest.NAV_record
+        # Create out dataframe
+        self._stats = pd.DataFrame(self._NAV_record, index=["NAV"]).T
+        self._summary_stats = pd.DataFrame([np.nan])
+        self._daily_drawdown = pd.Series()
+        self._max_daily_drawdown = pd.Series()
+        self._drawdown_duration_max = int()
+
+    def compute_stats(self) -> Tuple[pd.DataFrame, pd.DataFrame]:
+        """Compute backtest statistics."""
+        self._compute_returns()
+        self._compute_volatility()
+        self._compute_sharpe_ratio()
+        self._compute_max_drawdown()
+        self._compute_longest_drawdown()
+        self._construct_summary_stats()
+
+        # Clean up
+        self._stats = self._stats.drop(
+            columns=["Volatility", "Max Drawdown", "Sharpe Ratio"]
+        )
+
+        return self._stats, self._summary_stats
+
     @property
     def plot(self) -> None:
         """Plot the NAV record."""
         plt.figure()
-        plt.plot(self._NAV_record.keys(), self._NAV_record.values())
+        normalised_NAV_record = [
+            NAV / self.backtest.portfolio.get_initial_capital
+            for NAV in self._NAV_record.values()
+        ]
+        plt.plot(self._NAV_record.keys(), normalised_NAV_record)
+        plt.title("NAV - Daily Rebalancing - 0.3% Transaction Cost")
+        plt.ylabel("NAV / Initial Capital")
+        plt.xlabel("Date")
         plt.show()
+
+    def underwater_plot(self) -> None:
+        """Plot the drawdowns."""
+        if len(self._daily_drawdown) == 0:
+            raise ValueError("Please run compute_stats() first.")
+        plt.figure()
+        plt.plot(self._daily_drawdown.index, self._daily_drawdown)
+        plt.plot(self._max_daily_drawdown.index, self._max_daily_drawdown)
+        plt.title("Drawdowns")
+        plt.ylabel("Drawdown")
+        plt.xlabel("Date")
+        plt.show()
+
+    def _construct_summary_stats(self) -> None:
+        """Construct dataframe of summary statistics for entire backtest."""
+        self._summary_stats["Total Return"] = (
+            self._stats["NAV"].iloc[-1] / self._stats["NAV"].iloc[0] - 1
+        )
+        self._summary_stats["Annualised Return"] = (
+            1 + self._summary_stats["Total Return"]
+        ) ** (252 / len(self._stats)) - 1
+        self._summary_stats["Sharpe Ratio"] = self._stats["Sharpe Ratio"].mean()
+        self._summary_stats["Volatility"] = self._stats["Volatility"].mean()
+        self._summary_stats["Max Drawdown"] = abs(
+            self._stats["Max Drawdown"].min()
+        )
+        self._summary_stats["Max Drawdown Date"] = self._stats[
+            "Max Drawdown"
+        ].idxmin()
+        self._summary_stats["Longest Drawdown"] = self._drawdown_duration_max
+
+    def _compute_returns(self) -> None:
+        """Compute (cumulative) returns."""
+        self._stats["Returns"] = self._stats["NAV"].pct_change()
+        self._stats["Cumulative Returns"] = (
+            1 + self._stats["Returns"]
+        ).cumprod() - 1
+        self._stats = self._stats.dropna()
+
+    def _compute_volatility(self) -> None:
+        """Compute (annualised) volatility."""
+        self._stats["Volatility"] = self._stats["Returns"].std() * np.sqrt(
+            len(self._stats)
+        )
+
+    def _compute_sharpe_ratio(self) -> None:
+        """Compute the (annualised) sharpe ratio."""
+        risk_free_rate = self.risk_free_rate * len(self._stats) / 252
+        self._stats["Sharpe Ratio"] = (
+            len(self._stats)
+            * (self._stats["Returns"].mean() - risk_free_rate)
+            / self._stats["Volatility"].values[0]
+        )
+
+    def _compute_max_drawdown(self) -> None:
+        """Compute the maximum drawdown."""
+        rolling_max_NAV = (
+            self._stats["NAV"].rolling(len(self._stats), min_periods=1).max()
+        )
+        self._daily_drawdown = self._stats["NAV"] / rolling_max_NAV - 1.0
+        self._max_daily_drawdown = self._daily_drawdown.rolling(
+            len(self._stats), min_periods=1
+        ).min()
+        # Max drawdown so far
+        self._stats["Max Drawdown"] = self._max_daily_drawdown
+
+    def _compute_longest_drawdown(self) -> None:
+        """Compute the longest drawdown."""
+        start_end_drawdowns = self._daily_drawdown.drop(
+            self._daily_drawdown[self._daily_drawdown != 0].index
+        )
+        drawdown_durations = (
+            start_end_drawdowns.index.to_series().diff().dt.days
+        )
+        end_date = self._daily_drawdown.index[-1]
+        if end_date not in start_end_drawdowns.index:
+            drawdown_durations[end_date] = (
+                end_date - start_end_drawdowns.index[-1]
+            ).days
+        self._drawdown_duration_max = drawdown_durations.max()
