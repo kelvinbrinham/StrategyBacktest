@@ -72,7 +72,6 @@ class BacktestAnalysis:
         self._compute_max_drawdown()
         self._compute_longest_drawdown()
         self._construct_summary_stats()
-
         # Clean up
         self._stats = self._stats.drop(
             columns=["Volatility", "Max Drawdown", "Sharpe Ratio"]
@@ -98,8 +97,9 @@ class BacktestAnalysis:
         writer.sheets["Time Series"].set_column(2, 3, 15, percent_format)
         writer.sheets["Summary"].set_column(0, 1, 20, percent_format)
         writer.sheets["Summary"].set_column(2, 3, 20, percent_format)
-        writer.sheets["Summary"].set_column(5, 6, 20, percent_format)
-        writer.sheets["Summary"].set_column(7, 8, 30)
+        writer.sheets["Summary"].set_column(4, 5, 20)
+        writer.sheets["Summary"].set_column(6, 7, 20, percent_format)
+        writer.sheets["Summary"].set_column(8, 9, 30)
 
         writer.close()
 
@@ -166,10 +166,14 @@ class BacktestAnalysis:
         self._summary_stats["Total Return"] = (
             self._stats["NAV"].iloc[-1] / self._stats["NAV"].iloc[0] - 1
         )
-        self._summary_stats["Annualised Return"] = (
+        self._summary_stats["Return (Ann.)"] = (
             1 + self._summary_stats["Total Return"]
         ) ** (252 / len(self._stats)) - 1
         self._summary_stats["Sharpe Ratio"] = self._stats["Sharpe Ratio"].mean()
+        self._summary_stats["Sharpe Ratio (Ann.)"] = (
+            np.sqrt(252 / (len(self._stats) - 1))
+            * self._summary_stats["Sharpe Ratio"]
+        )
         self._summary_stats["Volatility"] = self._stats["Volatility"].mean()
         self._summary_stats["Max Drawdown"] = abs(
             self._stats["Max Drawdown"].min()
@@ -187,12 +191,13 @@ class BacktestAnalysis:
         self._stats["Cumulative Returns"] = (
             1 + self._stats["Returns"]
         ).cumprod() - 1
-        self._stats = self._stats.dropna()
+        self._stats = self._stats.fillna(0)
 
     def _compute_volatility(self) -> None:
         """Compute (annualised) volatility."""
-        self._stats["Volatility"] = self._stats["Returns"].std() * np.sqrt(
-            len(self._stats)
+        # Ignore first value which is not physical
+        self._stats["Volatility"] = self._stats["Returns"][1:].std() * np.sqrt(
+            len(self._stats) - 1
         )
 
     def _compute_sharpe_ratio(self) -> None:
@@ -200,9 +205,9 @@ class BacktestAnalysis:
         # Convert risk free rate to daily
         risk_free_rate = self.risk_free_rate / 252
         self._stats["Sharpe Ratio"] = (
-            len(self._stats)
+            (len(self._stats) - 1)
             # Mean daily returns including risk free rate deduction
-            * (self._stats["Returns"] - risk_free_rate).mean()
+            * (self._stats["Returns"][1:] - risk_free_rate).mean()
             / self._stats["Volatility"].values[0]
         )
 

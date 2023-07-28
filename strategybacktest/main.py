@@ -14,11 +14,11 @@ from strategy import DummyStrategy
 
 def run_backtest() -> None:
     """Run the backtest."""
-    data_filepath = ".data/Task_simple.xlsx"
+    data_filepath = ".data/Task.xlsx"
 
     # Collect data.
     # I can plot here to check for outliers. There are none.
-    prices_df, weights_df = data_collector(data_filepath, plot=True)
+    prices_df, weights_df = data_collector(data_filepath, plot=False)
 
     asset_universe = list(prices_df.columns)
 
@@ -51,8 +51,8 @@ def run_backtest() -> None:
     analyser.compute_stats()
 
     # Plot results
-    analyser.plot
-    analyser.underwater_plot
+    # analyser.plot
+    # analyser.underwater_plot
 
     # Save results to excel
     analyser.output_to_excel(filepath="output/summary.xlsx")

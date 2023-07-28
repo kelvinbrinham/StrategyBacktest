@@ -118,6 +118,8 @@ class Portfolio:
                 cost_trade_value = target_position_value
 
             trade_quantity = int(cost_trade_value / prices[ticker])
+            # Fractional shares
+            # trade_quantity = cost_trade_value / prices[ticker]
 
             trade_dict[ticker] = trade_quantity
 
