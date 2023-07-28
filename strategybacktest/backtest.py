@@ -138,10 +138,12 @@ class BacktestAnalysis:
 
     def _compute_sharpe_ratio(self) -> None:
         """Compute the (annualised) sharpe ratio."""
-        risk_free_rate = self.risk_free_rate * len(self._stats) / 252
+        # Convert risk free rate to daily
+        risk_free_rate = self.risk_free_rate / 252
         self._stats["Sharpe Ratio"] = (
             len(self._stats)
-            * (self._stats["Returns"].mean() - risk_free_rate)
+            # Mean daily returns including risk free rate deduction
+            * (self._stats["Returns"] - risk_free_rate).mean()
             / self._stats["Volatility"].values[0]
         )
 

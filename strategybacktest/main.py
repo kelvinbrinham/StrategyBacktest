@@ -21,14 +21,14 @@ prices_df, weights_df = data_collector(data_filepath, plot=False)
 # Initialise the backtest
 asset_universe = list(prices_df.columns)
 
-initial_capital = 1000000000
+initial_capital = 10000000
 strategy = DummyStrategy(weights_df=weights_df)
 
 portfolio = Portfolio(
     initial_capital=initial_capital,
     price_data_source=prices_df,
     asset_universe=asset_universe,
-    transaction_cost=0.003,
+    transaction_cost=0.000,
 )
 
 backtest = Backtest(
@@ -39,7 +39,7 @@ backtest.run_backtest()
 
 
 # Analysis
-analyser = BacktestAnalysis(backtest=backtest, risk_free_rate=0.0)
+analyser = BacktestAnalysis(backtest=backtest, risk_free_rate=0.02)
 stats = analyser.compute_stats()
 
 # print(stats[0])
