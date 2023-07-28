@@ -68,6 +68,11 @@ class Portfolio:
                 for ticker, position in self.positions.items()
             }
 
+            # Update cash
+            self._cash = self._NAV - self._get_net_asset_value(
+                prices=self._prices
+            )
+
         self._current_weights = weights
 
     @property
@@ -94,7 +99,6 @@ class Portfolio:
             Dictionary of new position sizes for each stock.
         """
         trade_dict = dict()
-        leftover_capital = 0
         for ticker, target_weight in target_weights.items():
             # Calculate number of shares
             # NOTE: We assume buy and sell price are the same given the data.
@@ -115,18 +119,8 @@ class Portfolio:
 
             trade_quantity = int(cost_trade_value / prices[ticker])
 
-            if trade_quantity > 0:
-                leftover_capital += (
-                    cost_trade_value - trade_quantity * prices[ticker]
-                )
-            else:
-                leftover_capital -= (
-                    cost_trade_value - trade_quantity * prices[ticker]
-                )
-
             trade_dict[ticker] = trade_quantity
 
-        self._cash = leftover_capital
         self._initial = False
         return trade_dict
 
