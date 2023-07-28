@@ -61,9 +61,11 @@ class BacktestAnalysis:
         self._daily_drawdown = pd.Series()
         self._max_daily_drawdown = pd.Series()
         self._drawdown_duration_max = int()
+        self._compute_stats = False
 
     def compute_stats(self) -> Tuple[pd.DataFrame, pd.DataFrame]:
         """Compute backtest statistics."""
+        self._compute_stats = True
         self._compute_returns()
         self._compute_volatility()
         self._compute_sharpe_ratio()
@@ -75,8 +77,45 @@ class BacktestAnalysis:
         self._stats = self._stats.drop(
             columns=["Volatility", "Max Drawdown", "Sharpe Ratio"]
         )
+        self._summary_stats = self._summary_stats.drop(columns=[0])
 
-        return self._stats, self._summary_stats.drop(columns=[0])
+    def output_to_excel(self, filepath: str) -> None:
+        """
+        Output stats to excel.
+
+        Args:
+            filepath: Filepath to output excel file.
+        """
+        if not self._compute_stats:
+            raise ValueError("Please run compute_stats() first.")
+
+        writer = pd.ExcelWriter(filepath, engine="xlsxwriter")
+
+        self._summary_stats.to_excel(writer, sheet_name="Summary", index=False)
+        self._stats.to_excel(writer, sheet_name="Time Series", index=True)
+        percent_format = writer.book.add_format({"num_format": "0.00%"})
+        # Now apply the number format to the column with index 2.
+        writer.sheets["Time Series"].set_column(2, 3, 15, percent_format)
+        writer.sheets["Summary"].set_column(0, 1, 20, percent_format)
+        writer.sheets["Summary"].set_column(2, 3, 20, percent_format)
+        writer.sheets["Summary"].set_column(5, 6, 20, percent_format)
+        writer.sheets["Summary"].set_column(7, 8, 30)
+
+        writer.close()
+
+    @property
+    def stats(self) -> pd.DataFrame:
+        """Return the stats dataframe."""
+        if not self._compute_stats:
+            raise ValueError("Please run compute_stats() first.")
+        return self._stats
+
+    @property
+    def summary_stats(self) -> pd.DataFrame:
+        """Return the stats dataframe."""
+        if not self._compute_stats:
+            raise ValueError("Please run compute_stats() first.")
+        return self._summary_stats
 
     @property
     def plot(self) -> None:
@@ -95,7 +134,7 @@ class BacktestAnalysis:
     @property
     def underwater_plot(self) -> None:
         """Plot the drawdowns."""
-        if len(self._daily_drawdown) == 0:
+        if not self._compute_stats:
             raise ValueError("Please run compute_stats() first.")
         plt.figure()
         plt.plot(self._daily_drawdown.index, self._daily_drawdown)
@@ -107,6 +146,10 @@ class BacktestAnalysis:
 
     def _construct_summary_stats(self) -> None:
         """Construct dataframe of summary statistics for entire backtest."""
+        self._summary_stats[
+            "Transaction Cost"
+        ] = self.backtest.portfolio.transaction_cost
+        self._summary_stats["Risk Free Rate"] = self.risk_free_rate
         self._summary_stats["Total Return"] = (
             self._stats["NAV"].iloc[-1] / self._stats["NAV"].iloc[0] - 1
         )
@@ -121,7 +164,9 @@ class BacktestAnalysis:
         self._summary_stats["Max Drawdown Date"] = self._stats[
             "Max Drawdown"
         ].idxmin()
-        self._summary_stats["Longest Drawdown"] = self._drawdown_duration_max
+        self._summary_stats[
+            "Longest Drawdown (Days)"
+        ] = self._drawdown_duration_max
 
     def _compute_returns(self) -> None:
         """Compute (cumulative) returns."""

@@ -28,7 +28,7 @@ portfolio = Portfolio(
     initial_capital=initial_capital,
     price_data_source=prices_df,
     asset_universe=asset_universe,
-    transaction_cost=0.000,
+    transaction_cost=0.003,
 )
 
 backtest = Backtest(
@@ -40,13 +40,12 @@ backtest.run_backtest()
 
 # Analysis
 analyser = BacktestAnalysis(backtest=backtest, risk_free_rate=0.02)
-stats = analyser.compute_stats()
+analyser.compute_stats()
 
-# print(stats[0])
-print(stats[1])
+stats = analyser.stats
+summary_stats = analyser.summary_stats
 
-analyser.plot
-analyser.underwater_plot
+print(stats)
+print(summary_stats)
 
-
-# 29 days
+analyser.output_to_excel(filepath="output/summary.xlsx")
