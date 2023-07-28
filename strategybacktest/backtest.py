@@ -76,7 +76,7 @@ class BacktestAnalysis:
             columns=["Volatility", "Max Drawdown", "Sharpe Ratio"]
         )
 
-        return self._stats, self._summary_stats
+        return self._stats, self._summary_stats.drop(columns=[0])
 
     @property
     def plot(self) -> None:
@@ -92,6 +92,7 @@ class BacktestAnalysis:
         plt.xlabel("Date")
         plt.show()
 
+    @property
     def underwater_plot(self) -> None:
         """Plot the drawdowns."""
         if len(self._daily_drawdown) == 0:

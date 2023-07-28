@@ -46,7 +46,7 @@ stats = analyser.compute_stats()
 print(stats[1])
 
 analyser.plot
-# analyser.underwater_plot
+analyser.underwater_plot
 
 
 # 29 days
