@@ -4,6 +4,11 @@ This is a basic strategy backtesting tool. The strategy included is a dummy stra
 
 The backtest includes flat-rate transaction costs and includes a variable risk free rate. The risk-free rate is not yet involved in shorting but only in the calculation of Sharpe ratio!
 
+I note a few points:
+
+- Only whole shares are used (but this can be easily changed in the Portfolio class).
+- ...
+
 ## Installation
 
 To install this package, clone the repository and set up a virtual poetry environment according to the `pyproject.toml` file. Then, run `poetry install` to install the dependencies.
