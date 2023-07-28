@@ -133,7 +133,6 @@ class BacktestAnalysis:
         )
         plt.ylabel("NAV / Initial Capital")
         plt.xlabel("Date")
-        plt.savefig("output/NAV_plot.png", dpi=500)
         plt.show()
 
     @property
@@ -156,7 +155,6 @@ class BacktestAnalysis:
         plt.ylabel("Drawdown")
         plt.xlabel("Date")
         plt.legend()
-        plt.savefig("output/underwater.png", dpi=500)
         plt.show()
 
     def _construct_summary_stats(self) -> None:
