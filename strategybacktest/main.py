@@ -11,8 +11,17 @@ from portfolio import Portfolio
 from strategy import DummyStrategy
 
 
-def run_backtest() -> None:
-    """Run the backtest."""
+def run_backtest(
+    initial_capital: float, risk_free_rate: float, transaction_cost: float
+) -> None:
+    """
+    Run the backtest.
+
+    Args:
+        initial_capital: Initial capital to invest.
+        risk_free_rate: Risk free rate.
+        transaction_cost: Percentage transaction cost per trade.
+    """
     data_filepath = ".data/Task.xlsx"
 
     # Collect data.
@@ -20,10 +29,6 @@ def run_backtest() -> None:
     prices_df, weights_df = data_collector(data_filepath, plot=False)
 
     asset_universe = list(prices_df.columns)
-
-    initial_capital = 100000
-    risk_free_rate = 0.015
-    transaction_cost = 0.003
 
     # Initialise strategy
     strategy = DummyStrategy(weights_df=weights_df)
@@ -50,14 +55,33 @@ def run_backtest() -> None:
     analyser.compute_stats()
 
     # Plot results
-    # analyser.plot
-    # analyser.underwater_plot
-    # analyser.volatility_plot
+    # save_plots = True
+    # analyser.plot(save=save_plots)
+    # analyser.underwater_plot(save=save_plots)
+    # analyser.volatility_plot(save=save_plots)
 
     # Save results to excel
-    analyser.output_to_excel(filepath="output/summary.xlsx")
+    analyser.output_to_excel(
+        filepath=f"output/summary_ic{initial_capital}_tc{transaction_cost}"
+        f" _rf{risk_free_rate}.xlsx"
+    )
 
 
 if __name__ == "__main__":
     # Run backtest and produce time-series and summary results as excel files.
-    run_backtest()
+    initial_capital = 1000000
+    risk_free_rate = [0, 0.015]
+    transaction_cost = [0.003, 0]
+    run_backtest(
+        initial_capital=initial_capital,
+        risk_free_rate=0,
+        transaction_cost=0.003,
+    )
+
+    for risk_free_rate_ in risk_free_rate:
+        for transaction_cost_ in transaction_cost:
+            run_backtest(
+                initial_capital=initial_capital,
+                risk_free_rate=risk_free_rate_,
+                transaction_cost=transaction_cost_,
+            )

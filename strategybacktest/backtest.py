@@ -118,9 +118,13 @@ class BacktestAnalysis:
             raise ValueError("Please run compute_stats() first.")
         return self._summary_stats
 
-    @property
-    def plot(self) -> None:
-        """Plot the NAV record."""
+    def plot(self, save: bool = False) -> None:
+        """
+        Plot the NAV record.
+
+        Args:
+            save: Boolean to save plot. Defaults to False.
+        """
         plt.figure()
         normalised_NAV_record = [
             NAV / self.backtest.portfolio.get_initial_capital
@@ -134,11 +138,17 @@ class BacktestAnalysis:
         )
         plt.ylabel("NAV / Initial Capital")
         plt.xlabel("Date")
+        if save:
+            plt.savefig("output/nav.png", dpi=500)
         plt.show()
 
-    @property
-    def underwater_plot(self) -> None:
-        """Plot the drawdowns."""
+    def underwater_plot(self, save: bool = False) -> None:
+        """
+        Plot the drawdowns.
+
+        Args:
+            save: Boolean to save plot. Defaults to False.
+        """
         if not self._compute_stats:
             raise ValueError("Please run compute_stats() first.")
         fig, ax = plt.subplots()
@@ -157,11 +167,17 @@ class BacktestAnalysis:
         ax.set_xlabel("Date")
         ax.yaxis.set_major_formatter(mtick.PercentFormatter(decimals=1))
         ax.legend(loc="lower left")
+        if save:
+            plt.savefig("output/underwater.png", dpi=500)
         plt.show()
 
-    @property
-    def volatility_plot(self) -> None:
-        """Plot the volatility."""
+    def volatility_plot(self, save: bool = False) -> None:
+        """
+        Plot the volatility.
+
+        Args:
+            save: Boolean to save plot. Defaults to False.
+        """
         plt.figure()
         rolling_volatility = self._rolling_volatility()
         if not self._compute_stats:
@@ -170,12 +186,18 @@ class BacktestAnalysis:
         ax.plot(
             rolling_volatility.index,
             rolling_volatility * 100,
-            label="Daily Drawdown",
+            label="Rolling 21 day Volatility",
         )
-        ax.set_title("Rolling 21 day Volatility")
-        ax.set_ylabel("Rolling 21 day Volatility (Ann.)")
+        average_value = rolling_volatility.mean() * 100
+        ax.axhline(
+            y=average_value, color="black", linestyle="dashed", label="Average"
+        )
+        ax.set_title("Volatility (Ann.)")
         ax.set_xlabel("Date")
+        ax.legend(loc="lower left")
         ax.yaxis.set_major_formatter(mtick.PercentFormatter(decimals=1))
+        if save:
+            plt.savefig("output/volatility.png", dpi=500)
         plt.show()
 
     def _construct_summary_stats(self) -> None:
