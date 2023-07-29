@@ -114,12 +114,15 @@ class Momentum(Strategy):
                 ]
                 returns_df = month_prices.pct_change().dropna().mean()
                 winner = returns_df.idxmax()
-                loser = returns_df.idxmin()
-                self._current_weights = {winner: 0.5, loser: -0.5}
+                # loser = returns_df.idxmin()
+                # self._current_weights = {winner: 0.5, loser: -0.5}
+                if returns_df[winner].mean() > 0:
+                    self._current_weights = {winner: 1}
+                else:
+                    self._current_weights = {}
 
             if not self._initial:
                 self._second = False
-
             self._initial = False
 
         return self._current_weights

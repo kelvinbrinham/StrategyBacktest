@@ -26,7 +26,7 @@ def run_backtest(
 
     # Collect data.
     # I can plot here to check for outliers. There are none.
-    prices_df, weights_df = data_collector(data_filepath, plot=True)
+    prices_df, weights_df = data_collector(data_filepath, plot=False)
 
     asset_universe = list(prices_df.columns)
 
