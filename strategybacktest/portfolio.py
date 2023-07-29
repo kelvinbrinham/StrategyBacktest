@@ -66,10 +66,6 @@ class Portfolio:
             )
 
             # Update positions
-            # self.positions = {
-            #     ticker: position + trades[ticker]
-            #     for ticker, position in self.positions.items()
-            # }
             self.positions = {
                 k: self.positions.get(k, 0) + trades.get(k, 0)
                 for k in set(self.positions) | set(trades)
