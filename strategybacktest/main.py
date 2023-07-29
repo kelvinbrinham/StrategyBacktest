@@ -78,7 +78,7 @@ if __name__ == "__main__":
     run_backtest(
         initial_capital=initial_capital,
         risk_free_rate=0,
-        transaction_cost=0.003,
+        transaction_cost=0,
     )
 
     # Run multiple backtests
