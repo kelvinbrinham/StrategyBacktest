@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt  # noqa: F401
 from backtest import Backtest, BacktestAnalysis
 from functions import data_collector
 from portfolio import Portfolio
-from strategy import DummyStrategy
+from strategy import DummyStrategy, Momentum  # noqa: F401
 
 
 def run_backtest(
@@ -26,12 +26,14 @@ def run_backtest(
 
     # Collect data.
     # I can plot here to check for outliers. There are none.
-    prices_df, weights_df = data_collector(data_filepath, plot=False)
+    prices_df, weights_df = data_collector(data_filepath, plot=True)
 
     asset_universe = list(prices_df.columns)
 
     # Initialise strategy
     strategy = DummyStrategy(weights_df=weights_df)
+    # strategy = Momentum(weights_df=weights_df, prices_df=prices_df)
+
     # Initialise portfolio
     portfolio = Portfolio(
         initial_capital=initial_capital,
@@ -44,6 +46,7 @@ def run_backtest(
         strategy=strategy,
         timestamps=prices_df.index.values,
         portfolio=portfolio,
+        price_data_source=prices_df,
     )
     # Run backtest
     backtest.run_backtest()
@@ -55,10 +58,10 @@ def run_backtest(
     analyser.compute_stats()
 
     # Plot results
-    # save_plots = True
-    # analyser.plot(save=save_plots)
-    # analyser.underwater_plot(save=save_plots)
-    # analyser.volatility_plot(save=save_plots)
+    save_plots = False
+    analyser.plot(save=save_plots)
+    analyser.underwater_plot(save=save_plots)
+    analyser.volatility_plot(save=save_plots)
 
     # Save results to excel
     analyser.output_to_excel(
@@ -78,10 +81,11 @@ if __name__ == "__main__":
         transaction_cost=0.003,
     )
 
-    for risk_free_rate_ in risk_free_rate:
-        for transaction_cost_ in transaction_cost:
-            run_backtest(
-                initial_capital=initial_capital,
-                risk_free_rate=risk_free_rate_,
-                transaction_cost=transaction_cost_,
-            )
+    # Run multiple backtests
+    # for risk_free_rate_ in risk_free_rate:
+    #     for transaction_cost_ in transaction_cost:
+    #         run_backtest(
+    #             initial_capital=initial_capital,
+    #             risk_free_rate=risk_free_rate_,
+    #             transaction_cost=transaction_cost_,
+    #         )

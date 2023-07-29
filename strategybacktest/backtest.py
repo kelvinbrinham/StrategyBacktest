@@ -17,14 +17,23 @@ class Backtest:
     Args:
         strategy: strategy class
         timestamps: list of timestamps during backtest period.
+        portfolio: portfolio class
+        price_data_source: Pricing data source e.g. API. In this case, it is a
+        predetermined dataframe.
     """
 
     def __init__(
-        self, strategy: Strategy, timestamps: list, portfolio: Portfolio
+        self,
+        strategy: Strategy,
+        timestamps: list,
+        portfolio: Portfolio,
+        price_data_source: pd.DataFrame,
     ) -> None:
+
         self.strategy = strategy
         self.timestamps = timestamps
         self.portfolio = portfolio
+        self.price_data_source = price_data_source
         self._NAV_record = dict()
 
     def run_backtest(self) -> None:
