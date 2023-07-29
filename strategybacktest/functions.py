@@ -1,6 +1,6 @@
-"""Miscallaneous functions for backtesting strategies."""
+"""Miscellaneous functions for backtesting strategies."""
 
-from typing import Tuple
+from typing import List, Tuple, Union
 
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -42,3 +42,67 @@ def data_collector(
             plt.legend()
 
     return prices_df, weights_df
+
+
+# NOTE: I intend to make a dedicated package to do this task at some point as I
+# often find myself doing it.
+def excel_summary_2_latex(filepath: Union[str, List[str]]) -> None:
+    """
+    Convert excel file to latex table in tex file.
+
+    Args:
+        filepath: Filepath to excel file(s)
+    """
+    if isinstance(filepath, str):
+        filepath = [filepath]
+
+    pct_columns = [
+        "Transaction Cost",
+        "Risk Free Rate",
+        "Total Return",
+        "Return (Ann.)",
+        "Volatility (Ann.)",
+        "Max Drawdown",
+    ]
+
+    summary_df_list = []
+    for filepath_ in filepath:
+        summary_df = pd.read_excel(filepath_, sheet_name="Summary")
+
+        # Flake8 complains about the % symbol in the lambda function but it is
+        # needed for writing to latex table.
+        summary_df[pct_columns] = summary_df[pct_columns].applymap(
+            lambda x: "{:.2f}".format(100 * x) + "\%"  # noqa: W605
+        )
+        summary_df[["Sharpe Ratio", "Sharpe Ratio (Ann.)"]] = summary_df[
+            ["Sharpe Ratio", "Sharpe Ratio (Ann.)"]
+        ].applymap(lambda x: "{:.2f}".format(x))
+
+        summary_df_format = summary_df.T
+        summary_df_list.append(summary_df_format)
+
+    summary_df_format = pd.concat(summary_df_list, axis=1)
+
+    caption = "Portfolio performance summary; daily rebalancing."
+
+    with open("output_tables/summary_table.tex", "w") as f:
+        f.write("\\begin{table}[p]\n")
+        f.write("\\centering\n")
+        f.write("\\caption{" + f"{caption}" + "}\n")
+
+        latex_table = summary_df_format.to_latex(
+            escape=False, header=False, index=True, column_format="rrrrrrr"
+        )
+
+        # Split the LaTeX table into lines
+        lines = latex_table.split("\n")
+
+        # Insert \hrule after the second row
+        lines.insert(5, r"\hline")
+
+        # Write the modified LaTeX table back to the file
+        f.write("\n".join(lines))
+
+        f.write("\\end{table}\n")
+
+    print(summary_df)

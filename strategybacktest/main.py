@@ -3,7 +3,6 @@ Main Script
 
 I include generous comments to explain my thoughts.
 """
-import sys  # noqa: F401
 
 import matplotlib.pyplot as plt  # noqa: F401
 from backtest import Backtest, BacktestAnalysis
@@ -23,8 +22,8 @@ def run_backtest() -> None:
     asset_universe = list(prices_df.columns)
 
     initial_capital = 100000
-    risk_free_rate = 0.0
-    transaction_cost = 0.0
+    risk_free_rate = 0.015
+    transaction_cost = 0.003
 
     # Initialise strategy
     strategy = DummyStrategy(weights_df=weights_df)
@@ -53,10 +52,12 @@ def run_backtest() -> None:
     # Plot results
     # analyser.plot
     # analyser.underwater_plot
+    # analyser.volatility_plot
 
     # Save results to excel
     analyser.output_to_excel(filepath="output/summary.xlsx")
 
 
 if __name__ == "__main__":
+    # Run backtest and produce time-series and summary results as excel files.
     run_backtest()

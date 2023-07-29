@@ -3,6 +3,7 @@
 from typing import Tuple
 
 import matplotlib.pyplot as plt
+import matplotlib.ticker as mtick
 import numpy as np
 import pandas as pd
 from portfolio import Portfolio
@@ -67,7 +68,7 @@ class BacktestAnalysis:
         """Compute backtest statistics."""
         self._compute_stats = True
         self._compute_returns()
-        self._compute_volatility()
+        self._compute_total_volatility()
         self._compute_sharpe_ratio()
         self._compute_max_drawdown()
         self._compute_longest_drawdown()
@@ -140,21 +141,41 @@ class BacktestAnalysis:
         """Plot the drawdowns."""
         if not self._compute_stats:
             raise ValueError("Please run compute_stats() first.")
-        plt.figure()
-        plt.plot(
+        fig, ax = plt.subplots()
+        ax.plot(
             self._daily_drawdown.index,
-            self._daily_drawdown,
+            self._daily_drawdown * 100,
             label="Daily Drawdown",
         )
-        plt.plot(
+        ax.plot(
             self._max_daily_drawdown.index,
-            self._max_daily_drawdown,
+            self._max_daily_drawdown * 100,
             label="Max Daily Drawdown",
         )
-        plt.title("Underwater Chart")
-        plt.ylabel("Drawdown")
-        plt.xlabel("Date")
-        plt.legend()
+        ax.set_title("Underwater Chart")
+        ax.set_ylabel("Drawdown")
+        ax.set_xlabel("Date")
+        ax.yaxis.set_major_formatter(mtick.PercentFormatter(decimals=1))
+        ax.legend(loc="lower left")
+        plt.show()
+
+    @property
+    def volatility_plot(self) -> None:
+        """Plot the volatility."""
+        plt.figure()
+        rolling_volatility = self._rolling_volatility()
+        if not self._compute_stats:
+            raise ValueError("Please run compute_stats() first.")
+        fig, ax = plt.subplots()
+        ax.plot(
+            rolling_volatility.index,
+            rolling_volatility * 100,
+            label="Daily Drawdown",
+        )
+        ax.set_title("Rolling 21 day Volatility")
+        ax.set_ylabel("Rolling 21 day Volatility (Ann.)")
+        ax.set_xlabel("Date")
+        ax.yaxis.set_major_formatter(mtick.PercentFormatter(decimals=1))
         plt.show()
 
     def _construct_summary_stats(self) -> None:
@@ -174,13 +195,15 @@ class BacktestAnalysis:
             np.sqrt(252 / (len(self._stats) - 1))
             * self._summary_stats["Sharpe Ratio"]
         )
-        self._summary_stats["Volatility"] = self._stats["Volatility"].mean()
+        self._summary_stats["Volatility (Ann.)"] = self._stats[
+            "Volatility"
+        ].mean() * np.sqrt(252 / (len(self._stats) - 1))
         self._summary_stats["Max Drawdown"] = abs(
             self._stats["Max Drawdown"].min()
         )
-        self._summary_stats["Max Drawdown Date"] = self._stats[
-            "Max Drawdown"
-        ].idxmin()
+        self._summary_stats["Max Drawdown Date"] = (
+            self._stats["Max Drawdown"].idxmin().strftime("%Y-%m-%d")
+        )
         self._summary_stats[
             "Longest Drawdown (Days)"
         ] = self._drawdown_duration_max
@@ -193,12 +216,20 @@ class BacktestAnalysis:
         ).cumprod() - 1
         self._stats = self._stats.fillna(0)
 
-    def _compute_volatility(self) -> None:
-        """Compute (annualised) volatility."""
+    def _compute_total_volatility(self) -> None:
+        """Compute volatility."""
         # Ignore first value which is not physical
         self._stats["Volatility"] = self._stats["Returns"][1:].std() * np.sqrt(
             len(self._stats) - 1
         )
+
+    def _rolling_volatility(self) -> pd.Series:
+        """Compute rolling 21 day volatility."""
+        rolling_volatility = self._stats["Returns"][1:].rolling(
+            21
+        ).std() * np.sqrt(252)
+
+        return rolling_volatility
 
     def _compute_sharpe_ratio(self) -> None:
         """Compute the (annualised) sharpe ratio."""

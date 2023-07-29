@@ -7,7 +7,7 @@ The backtest includes flat-rate transaction costs and includes a variable risk f
 I note a few points:
 
 - Only whole shares are used (but this can be easily changed in the Portfolio class). Spare capital is held as cash.
-- Weights change each month in the example data, but the portfolio is rebalanced daily (due to changed in share price). This can be changed in the Portfolio class. (E.g. if transaction costs are sufficiently high, one may want to rebalance less frequently.)
+- Weights change each month in the example data, but the portfolio is rebalanced daily (due to changed in share price). This can be changed in the Portfolio class. (E.g. if transaction costs are sufficiently high, one may want to rebalance less frequently).
 
 ## Installation
 
@@ -15,6 +15,8 @@ To install this package, clone the repository and set up a virtual poetry enviro
 
 ## Usage
 
-To run the backtest, run `poetry run python main.py` from the strategybacktest directory of the repository. Parameters such as risk free rate can be changed in the `main.py` file. Feel free to look through the docstrings in the other files to see what other parameters can be changed.
+To run the backtest, run `poetry run python main.py` from the strategybacktest directory of the repository. Parameters such as risk-free rate can be changed in the `main.py` file. Feel free to look through the docstrings in the other files to see what other parameters can be changed.
+
+The LaTeX_tables.py script can be used to generate LaTeX tables of the results from the output Excel files. The tables are saved in the `tables` directory. This is included in a separate script because one may wish to run multiple backtests and include the results in a single table produced by the LaTeX_tables.py script.
 
 ---
