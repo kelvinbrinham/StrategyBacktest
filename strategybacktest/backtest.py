@@ -188,7 +188,7 @@ class BacktestAnalysis:
         ax.set_ylabel("Drawdown")
         ax.set_xlabel("Date")
         ax.yaxis.set_major_formatter(mtick.PercentFormatter(decimals=1))
-        ax.legend(loc="lower left")
+        ax.legend()
         if save:
             plt.savefig("output/underwater.png", dpi=500)
         plt.show()
@@ -200,7 +200,6 @@ class BacktestAnalysis:
         Args:
             save: Boolean to save plot. Defaults to False.
         """
-        plt.figure()
         rolling_volatility = self._rolling_volatility()
         if not self._compute_stats:
             raise ValueError("Please run compute_stats() first.")
@@ -216,7 +215,7 @@ class BacktestAnalysis:
         )
         ax.set_title("Volatility (Ann.)")
         ax.set_xlabel("Date")
-        ax.legend(loc="lower left")
+        ax.legend()
         ax.yaxis.set_major_formatter(mtick.PercentFormatter(decimals=1))
         if save:
             plt.savefig("output/volatility.png", dpi=500)

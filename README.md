@@ -15,7 +15,7 @@ To install this package, clone the repository and set up a virtual poetry enviro
 
 ## Usage
 
-To run the backtest, run `poetry run python main.py` from the strategybacktest directory of the repository. Parameters such as risk-free rate can be changed in the `main.py` file. Feel free to look through the docstrings in the other files to see what other parameters can be changed.
+To run the backtest, run `poetry run python strategybacktest/main.py` from the root directory of the repository. (Alternatively run main.py using your IDE, but be careful of filepaths). Parameters such as risk-free rate can be changed in the `main.py` file. Feel free to look through the docstrings in the other files to see what other parameters can be changed.
 
 The LaTeX_tables.py script can be used to generate LaTeX tables of the results from the output Excel files. The tables are saved in the `tables` directory. This is included in a separate script because one may wish to run multiple backtests and include the results in a single table produced by the LaTeX_tables.py script.
 

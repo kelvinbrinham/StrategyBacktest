@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt  # noqa: F401
 from backtest import Backtest, BacktestAnalysis
 from functions import data_collector
 from portfolio import Portfolio
-from strategy import DummyStrategy, Momentum  # noqa: F401
+from strategy import DummyStrategy, MomentumStrategy  # noqa: F401
 
 
 def run_backtest(
@@ -35,7 +35,7 @@ def run_backtest(
 
     # Initialise strategy
     strategy = DummyStrategy(weights_df=weights_df)
-    # strategy = Momentum(weights_df=weights_df, prices_df=prices_df)
+    # strategy = MomentumStrategy(weights_df=weights_df, prices_df=prices_df)
 
     # Initialise portfolio
     portfolio = Portfolio(
@@ -82,7 +82,7 @@ if __name__ == "__main__":
         risk_free_rate=0,
         transaction_cost=0.003,
         plot=True,
-        save_plots=False,
+        save_plots=True,
     )
 
     # Run multiple backtests

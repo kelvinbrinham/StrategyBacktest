@@ -62,7 +62,7 @@ class DummyStrategy(Strategy):
         return self._current_weights
 
 
-class Momentum(Strategy):
+class MomentumStrategy(Strategy):
     """
     Simple momentum strategy.
 
