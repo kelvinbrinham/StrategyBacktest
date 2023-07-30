@@ -23,11 +23,6 @@ repos:
         "--config", "pyproject.toml"
       ]
 
-  - repo: https://github.com/martinstefanik/pre-commit-hooks
-    rev: v1.0.0
-    hooks:
-    - id: check-multiline-docstrings
-
   - repo: https://github.com/pycqa/flake8
     rev: 6.0.0
     hooks:
