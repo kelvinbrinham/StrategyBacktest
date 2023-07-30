@@ -1,4 +1,4 @@
-"""Backtest Class"""
+"""Backtest and BacktestAnalysis Class"""
 
 from typing import Tuple
 
@@ -12,14 +12,15 @@ from strategy import Strategy
 
 class Backtest:
     """
-    Backtest class which keeps track of transactions and portfolio value.
+    Backtest class responsible for running the backtest and storing the net
+    asset value (NAV).
 
     Args:
-        strategy: strategy class
-        timestamps: list of timestamps during backtest period.
-        portfolio: portfolio class
+        strategy: Strategy to backtest.
+        timestamps: List of timestamps representing the backtest period.
+        portfolio: Portfolio class.
         price_data_source: Pricing data source e.g. API. In this case, it is a
-        predetermined dataframe.
+        predetermined dataframe of historical data.
     """
 
     def __init__(
@@ -35,21 +36,28 @@ class Backtest:
         self.portfolio = portfolio
         self.price_data_source = price_data_source
         self._NAV_record = dict()
+        self._backtest_run = False
 
     def run_backtest(self) -> None:
         """Run the backtest."""
         for ts in self.timestamps:
             # Get target weights
             target_weights = self.strategy(ts)
-
+            # Rebalance portfolio
             self.portfolio.rebalance(weights=target_weights, ts=ts)
-
+            # Record NAV
             self._NAV_record[ts] = self.portfolio.NAV
+            self._backtest_run = True
 
     @property
     def NAV_record(self) -> dict:
-        """Return the NAV record for backtesting"""
+        """Return the NAV record from the backtest."""
         return self._NAV_record
+
+    @property
+    def backtest_run(self) -> bool:
+        """Return bool determining whether backtest has been run."""
+        return self._backtest_run
 
 
 class BacktestAnalysis:
@@ -57,16 +65,21 @@ class BacktestAnalysis:
     Compute backtest statistics.
 
     Args:
-        backtest: Backtest class.
+        backtest: Backtest to analyse. (The Backtest object must have been run.)
         risk_free_rate: (annual) Risk free rate. Defaults to 0.
     """
 
     def __init__(self, backtest: Backtest, risk_free_rate: float = 0) -> None:
         self.backtest = backtest
+
+        if self.backtest.backtest_run is False:
+            raise ValueError("Please run backtest first.")
+
         self.risk_free_rate = risk_free_rate
         self._NAV_record = backtest.NAV_record
-        # Create out dataframe
+        # Create time series statistics dataframe (price series etc.)
         self._stats = pd.DataFrame(self._NAV_record, index=["NAV"]).T
+        # Create summary statistics dataframe (sharpe ratio etc.)
         self._summary_stats = pd.DataFrame([np.nan])
         self._daily_drawdown = pd.Series()
         self._max_daily_drawdown = pd.Series()

@@ -1,4 +1,4 @@
-"""Miscellaneous functions for backtesting strategies."""
+"""Miscellaneous functions for StrategyBacktest."""
 
 from typing import List, Tuple, Union
 
@@ -10,12 +10,12 @@ def data_collector(
     data_filepath: str, plot: bool = False
 ) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """
-    Collects data from excel file, checks data is valid and returns a
+    Collects input data from excel file, checks data is valid and returns a
     dataframe.
 
     Args:
-        data_filepath: filepath to excel file.
-        plot: boolean to plot price data. Defaults to False.
+        data_filepath: Filepath to excel file.
+        plot: Boolean to plot price data. Defaults to False.
 
     Returns:
         Tuple of prices dataframe and weights dataframe.
@@ -48,10 +48,11 @@ def data_collector(
 # often find myself doing it.
 def excel_summary_2_latex(filepath: Union[str, List[str]]) -> None:
     """
-    Convert excel file to latex table in tex file.
+    Convert backtest summary data from excel to LaTeX table for inclusion in
+    documents.
 
     Args:
-        filepath: Filepath to excel file(s)
+        filepath: Filepath to excel file(s).
     """
     if isinstance(filepath, str):
         filepath = [filepath]
@@ -70,7 +71,7 @@ def excel_summary_2_latex(filepath: Union[str, List[str]]) -> None:
         summary_df = pd.read_excel(filepath_, sheet_name="Summary")
 
         # Flake8 complains about the % symbol in the lambda function but it is
-        # needed for writing to latex table.
+        # needed for writing percentages to latex table.
         summary_df[pct_columns] = summary_df[pct_columns].applymap(
             lambda x: "{:.2f}".format(100 * x) + "\%"  # noqa: W605
         )
@@ -104,5 +105,3 @@ def excel_summary_2_latex(filepath: Union[str, List[str]]) -> None:
         f.write("\n".join(lines))
 
         f.write("\\end{table}\n")
-
-    print(summary_df)

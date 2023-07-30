@@ -22,3 +22,7 @@ The LaTeX_tables.py script can be used to generate LaTeX tables of the results f
 Example data is included in .data. An example output is included in Examples for the default data, 0 risk-free rate and 0.3% transaction costs.
 
 ---
+
+### Note to self (future)
+
+- For future reference, it would be better to only pass the momentum strategy (and future strategies) the daily price in `__call__` using an historical price data file passed to the Backtest class. This is more general and ensures the strategy only gets in-sample daily data.

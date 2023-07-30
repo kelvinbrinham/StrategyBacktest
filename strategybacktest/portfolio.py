@@ -1,19 +1,27 @@
 """Portfolio class for backtesting."""
 
 
-from typing import Dict, List
+from typing import Dict
 
 import pandas as pd
 
 
 class Portfolio:
     """
-    Class to keep track of portfolio value and transactions.
+    Class to keep track of portfolio value, positions and execute trades
+    (changes in position as we of course do not have access to the market here).
+
+    NOTE: For future reference, asset universe would be included in the strategy
+    class such that the portfolio class can be used for multiple strategies. If
+    an asset was delisted, the strategy would return a zero weight for this
+    asset so it could be removed from the portfolio. As of now we have a
+    constant universe.
 
     Args:
         initial_capital: Initial capital to invest.
         price_data_source: Pricing data source e.g. API. In this case, it is
-        just a predetermined dataframe. transaction_cost: Percentage transaction
+        just a predetermined dataframe.
+        transaction_cost: Percentage transaction
         cost per trade. Defaults to 0.
     """
 
@@ -21,17 +29,14 @@ class Portfolio:
         self,
         initial_capital: float,
         price_data_source: pd.DataFrame,
-        asset_universe: List[str],
         transaction_cost: float = 0,
     ) -> None:
         self.price_data_source = price_data_source
-        self.asset_universe = asset_universe
         self.transaction_cost = transaction_cost
         # NOTE: If an asset is absent in self.positions => asset position is 0.
         # (We therefore do not have 0's in self.positions)
         self.positions = dict()
         self.initial_capital = initial_capital
-        # self.positions = initial_weights
         # NAV includes cash
         self._NAV = initial_capital
         self._cash = initial_capital
@@ -49,20 +54,26 @@ class Portfolio:
             weights: Dictionary of target weights.
             ts: Timestamp for rebalance.
         """
-        # Get new prices
+        # Get new ts prices
         self._prices = self.price_data_source.loc[ts].to_dict()
 
-        # Update NAV
+        # Update NAV from positions and new prices.
+        # NOTE: NAV is calculated before rebalancing, it is the same after
+        # rebalancing on the same day and so we just calculate it here. This is
+        # by construction because the rebalancing occurs with a budget of NAV
+        # calculated here, so it will be the same after rebalancing even if
+        # positions change.
         self._NAV = self._cash + self._get_net_asset_value(prices=self._prices)
+
+        # Record NAV for current day (BEFORE rebalance)
         self._rebalance_record[ts] = self._NAV
 
-        # NOTE: Frequency of rebalancing can be changed here.
-        # Monthly rebalancing
+        # NOTE: Frequency of rebalancing is determined here.
+        # Monthly rebalancing (Rebalance according to weights_df in input data).
         # if self._current_weights != weights:
-        # Daily rebalancing.
+        # Daily rebalancing. (Rebalance every day of the backtest).
         if True:
-            # Rebalance portfolio
-            # Size positions
+            # Size trades from weights.
             trades = self._position_sizer(
                 target_weights=weights, prices=self._prices
             )
@@ -82,12 +93,12 @@ class Portfolio:
 
     @property
     def NAV(self) -> float:
-        """Return the NAV for backtesting"""
+        """Return the NAV for backtest statistics."""
         return self._NAV
 
     @property
     def get_initial_capital(self) -> float:
-        """Return the Initial Capital for backtesting"""
+        """Return the Initial Capital for backtesting."""
         return self.initial_capital
 
     def _position_sizer(
@@ -97,16 +108,17 @@ class Portfolio:
         Calculate number of shares to buy for the target weights.
 
         Args:
-            target_weights: Target weights for each stock.
-            prices: Current prices for each stock.
+            target_weights: Target weights for each asset.
+            prices: Current prices for each asset.
 
         Returns:
-            Dictionary of new position sizes for each stock.
+            Dictionary of trades (number of positions to purchase) for each
+            asset.
         """
         trade_dict = dict()
         for ticker, target_weight in target_weights.items():
-            # Calculate number of shares
-            # NOTE: We assume buy and sell price are the same given the data.
+            # NOTE: We assume buy and sell price are the same given the data in
+            # this simpler prescription.
             target_position_value = self._NAV * target_weight
 
             if ticker in self.positions:
@@ -123,9 +135,12 @@ class Portfolio:
                 1 - self.transaction_cost
             )
 
+            # NOTE: We assume no transaction cost for initial positions. I.e.
+            # assume initial positions are already held.
             if self._initial:
                 cost_trade_value = target_position_value
 
+            # Whole shares
             trade_quantity = int(cost_trade_value / prices[ticker])
             # Fractional shares
             # trade_quantity = cost_trade_value / prices[ticker]
@@ -137,16 +152,16 @@ class Portfolio:
 
     def _get_net_asset_value(self, prices: Dict[str, float]) -> float:
         """
-        Get the current NAV
+        Get the current asset value (NAV - cash).
 
         Args:
-            prices: _description_
+            prices: Current asset prices.
 
         Returns:
-            Current market value of all assets.
+            Current market value of all positions held.
         """
-        net_asset_value = 0
+        total_asset_value = 0
         for ticker, position in self.positions.items():
-            net_asset_value += position * prices[ticker]
+            total_asset_value += position * prices[ticker]
 
-        return net_asset_value
+        return total_asset_value

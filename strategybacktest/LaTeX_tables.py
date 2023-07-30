@@ -6,7 +6,7 @@ from functions import excel_summary_2_latex
 
 
 def main() -> None:
-    """Run main function."""
+    """Convert multiple excel files to LaTeX tables."""
     output_dir = "output"
     file_list = os.listdir(output_dir)
     excel_files = [

@@ -1,8 +1,4 @@
-"""
-Main Script
-
-I include generous comments to explain my thoughts.
-"""
+"""Main Script for running the backtest."""
 
 import matplotlib.pyplot as plt  # noqa: F401
 from backtest import Backtest, BacktestAnalysis
@@ -28,7 +24,8 @@ def run_backtest(
     # I can plot here to check for outliers. There are none.
     prices_df, weights_df = data_collector(data_filepath, plot=False)
 
-    asset_universe = list(prices_df.columns)
+    # NOTE: Asset universe for future versions
+    # asset_universe = list(prices_df.columns)
 
     # Initialise strategy
     strategy = DummyStrategy(weights_df=weights_df)
@@ -38,7 +35,6 @@ def run_backtest(
     portfolio = Portfolio(
         initial_capital=initial_capital,
         price_data_source=prices_df,
-        asset_universe=asset_universe,
         transaction_cost=transaction_cost,
     )
     # Initialise backtest
@@ -71,10 +67,10 @@ def run_backtest(
 
 
 if __name__ == "__main__":
-    # Run backtest and produce time-series and summary results as excel files.
+    # Run backtest(s) and produce time-series and summary results as excel
+    # files.
     initial_capital = 1000000
-    risk_free_rate = [0, 0.015]
-    transaction_cost = [0.003, 0]
+
     run_backtest(
         initial_capital=initial_capital,
         risk_free_rate=0,
@@ -82,6 +78,8 @@ if __name__ == "__main__":
     )
 
     # Run multiple backtests
+    # risk_free_rate = [0, 0.015]
+    # transaction_cost = [0.003, 0]
     # for risk_free_rate_ in risk_free_rate:
     #     for transaction_cost_ in transaction_cost:
     #         run_backtest(
