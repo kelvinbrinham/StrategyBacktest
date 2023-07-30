@@ -8,7 +8,11 @@ from strategy import DummyStrategy, Momentum  # noqa: F401
 
 
 def run_backtest(
-    initial_capital: float, risk_free_rate: float, transaction_cost: float
+    initial_capital: float,
+    risk_free_rate: float,
+    transaction_cost: float,
+    plot: bool,
+    save_plots: bool = False,
 ) -> None:
     """
     Run the backtest.
@@ -17,6 +21,8 @@ def run_backtest(
         initial_capital: Initial capital to invest.
         risk_free_rate: Risk free rate.
         transaction_cost: Percentage transaction cost per trade.
+        plot: Plot backtest results.
+        save_plots: Save backtest plots. Defaults to False.
     """
     data_filepath = ".data/Task.xlsx"
 
@@ -54,10 +60,10 @@ def run_backtest(
     analyser.compute_stats()
 
     # Plot results
-    save_plots = False
-    analyser.plot(save=save_plots)
-    analyser.underwater_plot(save=save_plots)
-    analyser.volatility_plot(save=save_plots)
+    if plot:
+        analyser.plot(save=save_plots)
+        analyser.underwater_plot(save=save_plots)
+        analyser.volatility_plot(save=save_plots)
 
     # Save results to excel
     analyser.output_to_excel(
@@ -75,6 +81,8 @@ if __name__ == "__main__":
         initial_capital=initial_capital,
         risk_free_rate=0,
         transaction_cost=0.003,
+        plot=True,
+        save_plots=False,
     )
 
     # Run multiple backtests
