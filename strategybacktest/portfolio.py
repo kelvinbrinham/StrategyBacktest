@@ -27,7 +27,9 @@ class Portfolio:
         self.price_data_source = price_data_source
         self.asset_universe = asset_universe
         self.transaction_cost = transaction_cost
-        self.positions = {ticker: 0 for ticker in self.asset_universe}
+        # NOTE: If an asset is absent in self.positions => asset position is 0.
+        # (We therefore do not have 0's in self.positions)
+        self.positions = dict()
         self.initial_capital = initial_capital
         # self.positions = initial_weights
         # NAV includes cash
@@ -106,7 +108,11 @@ class Portfolio:
             # Calculate number of shares
             # NOTE: We assume buy and sell price are the same given the data.
             target_position_value = self._NAV * target_weight
-            current_position_value = self.positions[ticker] * prices[ticker]
+
+            if ticker in self.positions:
+                current_position_value = self.positions[ticker] * prices[ticker]
+            else:
+                current_position_value = 0
 
             pre_cost_trade_value = (
                 target_position_value - current_position_value
