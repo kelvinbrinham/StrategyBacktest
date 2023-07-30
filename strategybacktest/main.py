@@ -62,7 +62,7 @@ def run_backtest(
     # Save results to excel
     analyser.output_to_excel(
         filepath=f"output/summary_ic{initial_capital}_tc{transaction_cost}"
-        f" _rf{risk_free_rate}.xlsx"
+        f"_rf{risk_free_rate}.xlsx"
     )
 
 
@@ -74,7 +74,7 @@ if __name__ == "__main__":
     run_backtest(
         initial_capital=initial_capital,
         risk_free_rate=0,
-        transaction_cost=0,
+        transaction_cost=0.003,
     )
 
     # Run multiple backtests

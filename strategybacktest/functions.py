@@ -86,7 +86,8 @@ def excel_summary_2_latex(filepath: Union[str, List[str]]) -> None:
 
     caption = "Portfolio performance summary; daily rebalancing."
 
-    with open("output_tables/summary_table.tex", "w") as f:
+    output_filename = filepath_[15:]
+    with open(f"output_tables/table_{output_filename}.tex", "w") as f:
         f.write("\\begin{table}[p]\n")
         f.write("\\centering\n")
         f.write("\\caption{" + f"{caption}" + "}\n")
