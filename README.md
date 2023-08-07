@@ -25,6 +25,9 @@ Example data is included in .data. An example output is included in Examples for
 
 ---
 
-### Note to self (future)
+### Note to self (future; in rough order of priority)
 
-- For future reference, it would be better to only pass the momentum strategy (and future strategies) the daily price in `__call__` using an historical price data file passed to the Backtest class. This is more general and ensures the strategy only gets in-sample daily data.
+- Make into a package using poetry such that external strategies can use to backtest.
+- Add risk-free rate borrowing cost to shorts.
+- Add asset universe (because at the moment it is as if it is fixed).
+- No execution currently. (order numbers etc.)
