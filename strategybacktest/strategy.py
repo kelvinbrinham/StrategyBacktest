@@ -15,7 +15,7 @@ class Strategy(ABC):
     """
 
     @abstractmethod
-    def __init__(self, **kwargs) -> None:
+    def __init__(self) -> None:
         pass
 
     @abstractmethod
@@ -45,7 +45,7 @@ class DummyStrategy(Strategy):
         self.weights_df = weights_df
         self._current_weights = {}
 
-    def __call__(self, ts: pd.Timestamp) -> Dict[str, float]:
+    def __call__(self, ts: pd.Timestamp, **kwargs) -> Dict[str, float]:
         """
         Rebalance portfolio according to predetermined weights for each new
         timestamp.
@@ -83,37 +83,30 @@ class MomentumStrategy(Strategy):
         prices_df: Dataframe of daily prices for each asset. We ensure only new
         day prices are used to avoid look ahead bias. Hence, the price record
         etc. below.
-
-        NOTE: For future reference, it would be better to only pass this
-        strategy the daily price in __call__ using an historical price data file
-        passed to the Backtest price for generality as most strategies need
-        price data.
     """
 
-    def __init__(
-        self, weights_df: pd.DataFrame, prices_df: pd.DataFrame
-    ) -> None:
+    def __init__(self, weights_df: pd.DataFrame) -> None:
         self.weights_df = weights_df
-        self.prices_df = prices_df
         self._prices_record = pd.DataFrame()
         self._current_weights = {}
         self._initial = True
         self._second = True
 
-    def __call__(self, ts: pd.Timestamp) -> Dict[str, float]:
+    def __call__(
+        self, ts: pd.Timestamp, prices: pd.DataFrame
+    ) -> Dict[str, float]:
         """
         Rebalance portfolio for each new timestamp.
 
         Args:
             ts: Current timestamp.
+            prices: Dataframe of prices for each asset on ts.
 
         Returns:
             Portfolio weights.
         """
-        # Get new price
-        new_price_df = self.prices_df.loc[ts].to_frame().T
         # Update historical prices
-        self._prices_record = pd.concat([self._prices_record, new_price_df])
+        self._prices_record = pd.concat([self._prices_record, prices])
 
         if ts in self.weights_df.index:
             # For the first two months, return the default weights.

@@ -1,6 +1,6 @@
 """Backtest and BacktestAnalysis Class"""
 
-from typing import Tuple
+from typing import Optional, Tuple
 
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mtick
@@ -28,7 +28,7 @@ class Backtest:
         strategy: Strategy,
         timestamps: list,
         portfolio: Portfolio,
-        price_data_source: pd.DataFrame,
+        price_data_source: Optional[pd.DataFrame] = None,
     ) -> None:
 
         self.strategy = strategy
@@ -41,8 +41,11 @@ class Backtest:
     def run_backtest(self) -> None:
         """Run the backtest."""
         for ts in self.timestamps:
-            # Get target weights
-            target_weights = self.strategy(ts)
+            # Get prices for ts
+            prices = self.price_data_source.loc[ts]
+            # Get target weights (pass only new prices to strategy to avoid
+            # look-ahead bias)
+            target_weights = self.strategy(ts=ts, prices=prices)
             # Rebalance portfolio
             self.portfolio.rebalance(weights=target_weights, ts=ts)
             # Record NAV
