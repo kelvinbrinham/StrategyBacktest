@@ -17,7 +17,7 @@ To install this package, clone the repository and set up a virtual poetry enviro
 
 To run the backtest, run `poetry run python strategybacktest/main.py` from the root directory of the repository. (Alternatively run `main.py` using your IDE, but be careful of filepaths). Parameters such as risk-free rate can be changed in the `main.py` file. Feel free to look through the docstrings in the other files to see what other parameters can be changed.
 
-Two example strategies are included, a `DummyStrategy` which passes on fixed portfolio weights for particular dates as input in a csv file. The second is a simple long-only momentum strategy as a demonstration. 
+Two example strategies are included, a `DummyStrategy` which passes on fixed portfolio weights for particular dates as input in a csv file. The second is a simple long-only momentum strategy as a demonstration.
 
 The LaTeX_tables.py script can be used to generate LaTeX tables of the results from the output Excel files. The tables are saved in the `tables` directory. This is included in a separate script because one may wish to run multiple backtests and include the results in a single table produced by the LaTeX_tables.py script.
 
@@ -27,7 +27,9 @@ Example data is included in .data. An example output is included in Examples for
 
 ### Note to self (future; in rough order of priority)
 
+- Add tests.
 - Make into a package using poetry such that external strategies can use to backtest.
+- Add validation for parameters
 - Add risk-free rate borrowing cost to shorts.
 - Add asset universe (because at the moment it is as if it is fixed).
 - No execution currently. (order numbers etc.)

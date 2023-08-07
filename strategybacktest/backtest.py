@@ -49,7 +49,7 @@ class Backtest:
             # Rebalance portfolio
             self.portfolio.rebalance(weights=target_weights, ts=ts)
             # Record NAV
-            self._NAV_record[ts] = self.portfolio.NAV
+            self._NAV_record[ts] = self.portfolio.get_NAV
             self._backtest_run = True
 
     @property

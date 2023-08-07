@@ -92,7 +92,7 @@ class Portfolio:
         self._current_weights = weights
 
     @property
-    def NAV(self) -> float:
+    def get_NAV(self) -> float:
         """Return the NAV for backtest statistics."""
         return self._NAV
 
@@ -100,6 +100,11 @@ class Portfolio:
     def get_initial_capital(self) -> float:
         """Return the Initial Capital for backtesting."""
         return self.initial_capital
+
+    @property
+    def get_cash(self) -> float:
+        """Return the Cash for backtesting."""
+        return self._cash
 
     def _position_sizer(
         self, target_weights: Dict[str, float], prices: Dict[str, float]
