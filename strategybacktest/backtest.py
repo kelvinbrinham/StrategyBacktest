@@ -30,7 +30,6 @@ class Backtest:
         portfolio: Portfolio,
         price_data_source: Optional[pd.DataFrame] = None,
     ) -> None:
-
         self.strategy = strategy
         self.timestamps = timestamps
         self.portfolio = portfolio
