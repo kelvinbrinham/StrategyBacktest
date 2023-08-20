@@ -27,8 +27,6 @@ Example data is included in .data. An example output is included in Examples for
 
 ### Note to self (future; in rough order of priority)
 
-- Add tests.
-- Make into a package using poetry such that external strategies can use to backtest.
 - Add validation for parameters
 - Add risk-free rate borrowing cost to shorts.
 - Add asset universe (because at the moment it is as if it is fixed).
