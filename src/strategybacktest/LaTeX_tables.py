@@ -2,7 +2,7 @@
 
 import os
 
-from functions import excel_summary_2_latex
+from .functions import excel_summary_2_latex
 
 
 def main() -> None:

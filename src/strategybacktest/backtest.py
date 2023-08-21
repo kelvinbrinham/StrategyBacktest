@@ -6,8 +6,9 @@ import matplotlib.pyplot as plt
 import matplotlib.ticker as mtick
 import numpy as np
 import pandas as pd
-from portfolio import Portfolio
-from strategy import Strategy
+
+from .portfolio import Portfolio
+from .strategy import Strategy
 
 
 class Backtest:
