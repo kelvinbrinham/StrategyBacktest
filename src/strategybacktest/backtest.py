@@ -42,7 +42,7 @@ class Backtest:
         """Run the backtest."""
         for ts in self.timestamps:
             # Get prices dataframe for ts
-            prices = self.price_data_source[[ts]]
+            prices = self.price_data_source.loc[[ts]]
             # Get target weights (pass only new prices to strategy to avoid
             # look-ahead bias)
             target_weights = self.strategy(ts=ts, prices=prices)
