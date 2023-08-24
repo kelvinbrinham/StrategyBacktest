@@ -1,6 +1,6 @@
 # StrategyBacktest
 
-This is a basic strategy backtesting tool. The strategy included is a dummy strategy that takes time-series portfolio weights data and tests this strategy over historical stock data.
+This is a basic strategy backtesting package. An example dummy strategy is included in the `example_strategies/dummy_strategy.py` script which shows how to use the package.
 
 The backtest includes flat-rate transaction costs and includes a variable risk free rate. The risk-free rate is not yet involved in shorting but only in the calculation of Sharpe ratio!
 
@@ -11,17 +11,13 @@ I note a few points:
 
 ## Installation
 
-To install this package, clone the repository and set up a virtual poetry environment according to the `pyproject.toml` file. Then, run `poetry install` to install the dependencies.
+To install this package, add the repo and relevant release branch to your `pyproject.toml` file and run `poetry install`. (I recommend using poetry to manage your virtual environment).
 
 ## Usage
 
-To run the backtest, run `poetry run python strategybacktest/main.py` from the root directory of the repository. (Alternatively run `main.py` using your IDE, but be careful of filepaths). Parameters such as risk-free rate can be changed in the `main.py` file. Feel free to look through the docstrings in the other files to see what other parameters can be changed.
-
-Two example strategies are included, a `DummyStrategy` which passes on fixed portfolio weights for particular dates as input in a csv file. The second is a simple long-only momentum strategy as a demonstration.
+To backtest your strategy, install the package and run the backtest in the same way as in `example_strategies/dummy_strategy.py`. Parameters such as risk-free rate can be changed. Feel free to look through the docstrings in the package files for more information. You should have folders named `.data` and `output` in your strategy repo.
 
 The LaTeX_tables.py script can be used to generate LaTeX tables of the results from the output Excel files. The tables are saved in the `tables` directory. This is included in a separate script because one may wish to run multiple backtests and include the results in a single table produced by the LaTeX_tables.py script.
-
-Example data is included in .data. An example output is included in Examples for the default data, 0 risk-free rate and 0.3% transaction costs.
 
 ---
 
